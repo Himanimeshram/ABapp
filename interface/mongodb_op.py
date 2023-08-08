@@ -58,12 +58,28 @@ def create_user(username, first_name, last_name, password, email_id, phone_numbe
     except DuplicateKeyError:
         raise ValueError("Username already exists")
     
+async def get_user(username, password):
+    user = users_collection.find_one({"userName": username})
     
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+    
+    password_hash = user.get("passwordHash")  # Extract the password hash from the user dictionary
+    user_list = [user]
+    df = pd.DataFrame(user_list)
+    df["_id"] = df["_id"].astype(str)
+    parsed_df = json.loads(df.to_json(orient="records"))
+    
+    if bcrypt.verify(password, password_hash):  # Verify the password hash
+        return {"data": parsed_df, "Message": "success"}
+    
+    raise HTTPException(status_code=401, detail="Invalid username or password")
+
     
 async def create_service(name, description, duration, price):
     
     #check if service already exists
-    existing_service = await services_collection.find_one({"serviceName": name})
+    existing_service = services_collection.find_one({"serviceName": name})
     if existing_service:
             raise ValueError("Service already exists")
     

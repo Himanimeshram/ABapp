@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List
-from interface.mongodb_op import create_user, create_service, get_service, add_appointments
+from interface.mongodb_op import create_user, create_service, get_service, add_appointments, get_user
 from models.service_model_schemas import ServiceModelSchemas
 from models.appointment_model_schemas import AppointmentModelSchemas
 
@@ -11,6 +11,14 @@ async def signup(username: str, first_name: str, last_name: str, password: str, 
     try:
         create_user(username, first_name, last_name, password, email_id, phone_number, role)
         return {"message": "Signup successful"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@router.post("/login")
+async def login(username: str, password: str):
+    try:
+        user = await get_user(username, password)
+        return user
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
