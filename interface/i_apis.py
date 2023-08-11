@@ -15,8 +15,10 @@ async def signup(username: str, first_name: str, last_name: str, password: str, 
         raise HTTPException(status_code=400, detail=str(e))
     
 @router.post("/login")
-async def login(username: str, password: str):
+async def login(category: dict):
     try:
+        username = category.get("username")
+        password = category.get("password")
         user = await get_user(username, password)
         return user
     except ValueError as e:
