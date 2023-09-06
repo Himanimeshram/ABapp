@@ -68,6 +68,11 @@ async def get_user(username, password):
     user_list = [user]
     df = pd.DataFrame(user_list)
     df["_id"] = df["_id"].astype(str)
+    
+    # Drop unnecessary columns
+    columns_to_drop = ["passwordHash"]
+    df = df.drop(columns_to_drop, axis=1)
+    
     parsed_df = json.loads(df.to_json(orient="records"))
     
     if bcrypt.verify(password, password_hash):  # Verify the password hash
